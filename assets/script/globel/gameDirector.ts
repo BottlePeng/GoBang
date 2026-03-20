@@ -36,6 +36,7 @@ export class GameDirector extends Component {
         ],
     };
 
+    gamePlayer: string = 'Tourist'; // 玩家标识，游客-'Tourist', 玩家-'PlayerName'
     //=======================================生命周期=========================================
 
     onLoad() {
@@ -75,8 +76,10 @@ export class GameDirector extends Component {
                 board_state: response.board_state,
             };
             this.gameInfo = data;
+            console.log(data);
         } catch (error) {
             console.error('获取游戏信息失败:', error);
         }
     }
 }
+

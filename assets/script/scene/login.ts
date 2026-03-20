@@ -1,13 +1,13 @@
 import { _decorator, Button, Component, director, EditBox, Label, Node, Prefab } from 'cc';
 import { GameDirector } from '../globel/gameDirector';
 import { Api } from '../api/api';
-import { tips } from '../prefab/tips';
+import { Tips } from '../prefab/tips';
 const { ccclass, property } = _decorator;
 
 @ccclass('Login')
 export class Login extends Component {
-    @property(tips)
-    tipsPrefab: tips = null;
+    @property(Tips)
+    tipsPrefab: Tips = null;
 
     @property(EditBox)
     editBox: EditBox = null;
@@ -46,17 +46,25 @@ export class Login extends Component {
         }
 
         await GameDirector.instance.getGameInfo();
-        let res = await Api.isHasPlayer(this.editBox.string);
-        
-        if (res) {
-            // 跳转GameScene
-            director.loadScene('Game');
+        if (this.editBox.string !== this.black_player_name && this.editBox.string !== this.white_player_name) {
+            let res = await Api.isHasPlayer(this.editBox.string);
+            
+            if (res) {
+                GameDirector.instance.gamePlayer = this.editBox.string;
+
+                // 跳转GameScene
+                director.loadScene('Game');
+            } else {
+                this.tipsPrefab.startJumpEffect('用户名不可用,请联系管理员');
+            }
         } else {
-            this.tipsPrefab.startJumpEffect('用户名不可用,请联系管理员');
+            this.tipsPrefab.startJumpEffect('该用户已在线,请选择其他用户名');
         }
     }
 
     onWatchBtnClick() {
+        GameDirector.instance.gamePlayer = this.editBox.string;
+        
         // 跳转GameScene
         director.loadScene('Game');
     }

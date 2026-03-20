@@ -1,8 +1,8 @@
 import { _decorator, Component, easing, Label, Node, tween, UIOpacity, Vec3 } from 'cc';
 const { ccclass, property } = _decorator;
 
-@ccclass('tips')
-export class tips extends Component {
+@ccclass('Tips')
+export class Tips extends Component {
     @property(Label)
     label: Label = null!;
 

@@ -5,8 +5,8 @@ export interface IResponseConfig {
 }
 
 export interface IGoBangGameInfo {
-    black_player_name: string | null;
-    white_player_name: string | null;
+    black_player_id: string | null;
+    white_player_id: string | null;
     current_turn: 0 | 1;
     board_state: string;
 }

@@ -25,6 +25,7 @@ export class DBModel {
     // 查询当前对局信息
     static async getGameInfo() {
         const sql = `SELECT * FROM current_game WHERE id = 1`;
+
         const result = await DB.query(sql, []) as any;
 
         let res: IResponseConfig = {
@@ -49,12 +50,19 @@ export class DBModel {
                 board_state = Array(15).fill(0).map(() => Array(15).fill(0));
             }
 
+            const blackPlayerName = gameInfo.black_player_id
+                ? await this.getPlayerName(gameInfo.black_player_id)
+                : null;
+            const whitePlayerName = gameInfo.white_player_id
+                ? await this.getPlayerName(gameInfo.white_player_id)
+                : null;
+
             // 构建成功返回数据
             res = {
                 success: true,
                 data: {
-                    black_player_name: gameInfo.black_player_name,
-                    white_player_name: gameInfo.white_player_name,
+                    black_player_name: blackPlayerName, 
+                    white_player_name: whitePlayerName,
                     current_turn: gameInfo.current_turn,
                     board_state: board_state,
                 }
@@ -85,5 +93,24 @@ export class DBModel {
         }
 
         return res;
+    }
+
+
+    /**
+     * 根据玩家ID获取玩家名称
+     */
+    static async getPlayerName(playerId: string): Promise<string | null> {
+        try {
+            const sql = `SELECT name FROM players WHERE id = ?`;
+            const result = await DB.query(sql, [playerId]) as any[];
+
+            if (result && result.length > 0) {
+                return result[0].name;
+            }
+            return null;
+        } catch (error) {
+            console.error('获取玩家名称失败:', error);
+            return null;
+        }
     }
 }
