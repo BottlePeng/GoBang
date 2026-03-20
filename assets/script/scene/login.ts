@@ -51,6 +51,29 @@ export class Login extends Component {
             
             if (res) {
                 GameDirector.instance.gamePlayer = this.editBox.string;
+                
+
+                if (this.black_player_name === null) {
+                    GameDirector.instance.gameInfo.black_player_name = this.editBox.string;
+                    let gameInfo = GameDirector.instance.gameInfo;
+                    try {
+                        await Api.updateGameInfo(gameInfo);
+                    } catch (error) {
+                        this.tipsPrefab.startJumpEffect(error);
+                        return;
+                    }
+                } else if (this.white_player_name === null){
+                    GameDirector.instance.gameInfo.white_player_name = this.editBox.string;
+                    let gameInfo = GameDirector.instance.gameInfo;
+                    try {
+                        await Api.updateGameInfo(gameInfo);
+                    } catch (error) {
+                        this.tipsPrefab.startJumpEffect(error);
+                        return;
+                    }
+                } else {
+                    this.tipsPrefab.startJumpEffect('对局玩家已满,请耐心等待');
+                }
 
                 // 跳转GameScene
                 director.loadScene('Game');

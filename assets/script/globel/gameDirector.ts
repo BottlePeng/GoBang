@@ -81,5 +81,18 @@ export class GameDirector extends Component {
             console.error('获取游戏信息失败:', error);
         }
     }
+
+    getPlayerIndex() {
+        switch (this.gamePlayer) {
+            case 'Tourist':
+                return -1;
+            case this.gameInfo.black_player_name:
+                return 0;
+            case this.gameInfo.white_player_name:
+                return 1;
+            default:
+                return -1;
+        }
+    }
 }
 

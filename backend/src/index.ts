@@ -1,6 +1,7 @@
 // src/index.ts
 import express from 'express';
 import setupRoutes from '../routes/route';
+import { DBModel } from '../db/db_model';
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use(function (req, res, next) {
 
 // 解析前端的数据
 app.use(express.json()); // 解析 request.body
+app.use(express.urlencoded({ extended: true }));
 
 // 引入路由
 try {
@@ -43,7 +45,8 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 // 启动
 app.listen(PORT, () => {
+  DBModel.restart();
   console.log(`🚀 服务器启动成功！`);
-  console.log(`📡 端口: ${PORT}`);
+  console.log(`📡 服务器运行在 http://localhost:${PORT}`);
   console.log(`🌍 环境: ${process.env.NODE_ENV || 'development'}`);
 });

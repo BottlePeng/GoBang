@@ -27,11 +27,38 @@ export default function setupRoutes(app: Application): void {
         }
     });
 
+    // 查询是否存在用户
     app.post('/api/isHasPlayer', async (req: Request, res: Response) => {
         try {
             await Serve.isHasPlayer(req, res);
         } catch (error) {
             console.error('isHasPlayer 路由错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '服务器内部错误'
+            });
+        }
+    });
+
+    // 修改对局信息
+    app.post('/api/updateGameInfo', async (req: Request, res: Response) => {
+        try {
+            await Serve.updateGameInfo(req, res);
+        } catch (error) {
+            console.error('updateGameInfo 路由错误:', error);
+            res.status(500).json({
+                success: false,
+                message: '服务器内部错误'
+            });
+        }
+    });
+
+    // 心跳检测
+    app.post('/api/heartbeat', async (req: Request, res: Response) => {
+        try {
+            await Serve.postHeartbeat(req, res);
+        } catch (error) {
+            console.error('updateGameInfo 路由错误:', error);
             res.status(500).json({
                 success: false,
                 message: '服务器内部错误'
