@@ -2,7 +2,6 @@ import { _decorator, Button, Component, director, EditBox, Label, Node, Prefab }
 import { GameDirector } from '../globel/gameDirector';
 import { Api } from '../api/api';
 import { Tips } from '../prefab/tips';
-import { IClientData } from '../config/infoConfig';
 const { ccclass, property } = _decorator;
 
 @ccclass('Login')
@@ -65,7 +64,8 @@ export class Login extends Component {
                     }
 
                     // 跳转GameScene
-                    director.loadScene('Game');
+                    // director.loadScene('Game');
+                    console.log('跳转GameScene');
                 } else {
                     this.tipsPrefab.startJumpEffect('用户名不可用,请联系管理员');
                 }
@@ -78,12 +78,13 @@ export class Login extends Component {
     }
 
     onWatchBtnClick() {
-        GameDirector.instance.gamePlayer = this.editBox.string;
+        GameDirector.instance.playerName = this.editBox.string;
         
         if (this.watchers < 10) {
             Api.joinGame(-1, 0);
             // 跳转Game场景
-            director.loadScene('Game');
+            // director.loadScene('Game');
+            console.log('跳转GameScene');
         } else { 
             this.tipsPrefab.startJumpEffect('观战人数已满');
         }

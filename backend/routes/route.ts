@@ -14,19 +14,6 @@ export default function setupRoutes(app: Application): void {
             .send('Welcome to GoBang Game Server!');
     });
 
-    // 获取对局信息
-    app.get('/api/getGameInfo', async (req: Request, res: Response) => {
-        try {
-            await Serve.getGameInfo(req, res);
-        } catch (error) {
-            console.error('getGameInfo 路由错误:', error);
-            res.status(500).json({
-                success: false,
-                message: '服务器内部错误'
-            });
-        }
-    });
-
     // 查询是否存在用户
     app.post('/api/isHasPlayer', async (req: Request, res: Response) => {
         try {
@@ -40,12 +27,12 @@ export default function setupRoutes(app: Application): void {
         }
     });
 
-    // 修改对局信息
-    app.post('/api/updateGameInfo', async (req: Request, res: Response) => {
+    // 用户加入游戏
+    app.post('/api/joinGame', async (req: Request, res: Response) => {
         try {
-            await Serve.updateGameInfo(req, res);
+            await Serve.joinGame(req, res);
         } catch (error) {
-            console.error('updateGameInfo 路由错误:', error);
+            console.error('joinGame 路由错误:', error);
             res.status(500).json({
                 success: false,
                 message: '服务器内部错误'

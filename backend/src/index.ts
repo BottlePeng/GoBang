@@ -1,8 +1,8 @@
 // src/index.ts
 import express from 'express';
 import setupRoutes from '../routes/route';
-import { DBModel } from '../db/db_model';
-
+import http from 'http';
+import { Serve } from '../controller/serve';
 const app = express();
 
 // 设置跨域 - 使用中间件方式
@@ -43,12 +43,11 @@ try {
 // 获取端口
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
-// 配置ws服务器
-const config = {
-  port: parseInt(process.env.PORT || '3000'),
-  heartbeatInterval: parseInt(process.env.HEARTBEAT_INTERVAL || '30000'),
-  maxConnections: parseInt(process.env.MAX_CONNECTIONS || '100')
-};
+// 将 Express 应用传递给 http.createServer
+const server = http.createServer(app);
+// 创建 WebSocket 服务器（传入 HTTP 服务器）
+const wsServer = new Serve(server);
+wsServer.start();
 
 // 启动
 app.listen(PORT, () => {
@@ -56,3 +55,16 @@ app.listen(PORT, () => {
   console.log(`📡 服务器端口${PORT}已开启`);
   console.log(`🌍 环境: ${process.env.NODE_ENV || 'development'}`);
 });
+
+// 优雅关闭
+const gracefulShutdown = async () => {
+  console.log('\n🛑 正在关闭服务器...');
+  wsServer.stop(); // 关闭 WebSocket 服务器
+  server.close(() => {
+    console.log('✅ 服务器已关闭');
+    process.exit(0);
+  });
+};
+
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);

@@ -37,8 +37,11 @@ export class GameDirector extends Component {
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     ]
 
-    gamePlayerId: number = -1; // 玩家id, -1-游客,*-玩家id
-    gamePlayer: string = 'Tourist'; // 玩家标识，游客-'Tourist', 玩家-玩家用户名称
+    playerId: number = -1; // 玩家id, -1-游客,*-玩家id
+    playerName: string = 'Tourist'; // 玩家标识，游客-'Tourist', 玩家-玩家用户名称
+    playerColor: 0 | 1 = 0; // 玩家颜色，-1-游客，0-黑色，1-白色
+
+    token: string = ''; // 玩家token
 
     // 观战人数
     watchers: number = 0;

@@ -1,5 +1,6 @@
 // api.ts
 import { IHttpMessage } from "../config/infoConfig";
+import { GameDirector } from "../globel/gameDirector";
 import { request } from "../network/httpUtil";
 
 export class Api {
@@ -48,7 +49,7 @@ export class Api {
      */
     static async joinGame(playerId: number, playerColor: number): Promise<void> {
         try {
-            const response = await request('POST', '/api/joinGame', { playerName: playerId, playerColor });
+            const response = await request('POST', '/api/joinGame', { playerId, playerColor });
 
             let res:IHttpMessage = {
                 success: false,
@@ -57,7 +58,7 @@ export class Api {
             if (response) {
                 res.success = response.success;
                 res.message = response.message;
-                res.data = response.data;
+                GameDirector.instance.token = response.data;
             } else {
                 throw new Error('未请求到任何游戏信息,请联系管理员');
             }

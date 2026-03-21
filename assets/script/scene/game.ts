@@ -25,9 +25,9 @@ export class game extends Component {
         this.white_player_name = GameDirector.instance.gameInfo.white_player_name;   
 
         this.label.string = `当前回合: ${GameDirector.instance.gameInfo.current_turn === 0 ? '黑方' : '白方'}
-    你自己: ${GameDirector.instance.gamePlayer}-${GameDirector.instance.getPlayerIndex() === 0 ? '黑方' : '白方'}`;
+    你自己: ${GameDirector.instance.playerName}-${GameDirector.instance.getPlayerIndex() === 0 ? '黑方' : '白方'}`;
         
-        if (GameDirector.instance.gamePlayer !== 'Tourist') {
+        if (GameDirector.instance.playerName !== 'Tourist') {
             // 心跳
             this._timer += dt;
             if (this._timer >= this._time) {
