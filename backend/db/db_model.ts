@@ -1,4 +1,4 @@
-import { IGoBangGameInfo, IResponseConfig } from "../config/interfaceConfig";
+import { IGoBangGameInfo, IResponseConfig } from "../config/networkConfig";
 import { DB } from "./db";
 
 export class DBModel {
@@ -134,7 +134,11 @@ export class DBModel {
 
     // 心跳停止
     static async endHeartbeat(playerIndex: number) {
+        const player = playerIndex === 0 ? 'black_player_id' : 'white_player_id';
         console.log(`玩家 ${playerIndex === 0 ? '黑棋' : '白棋'} 掉线`);
+
+        const sql = `UPDATE current_game SET ${player} = NULL WHERE id = 1`;
+        await DB.query(sql, []);
     }
 
 

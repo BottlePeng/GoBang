@@ -2,6 +2,7 @@ import { _decorator, Button, Component, director, EditBox, Label, Node, Prefab }
 import { GameDirector } from '../globel/gameDirector';
 import { Api } from '../api/api';
 import { Tips } from '../prefab/tips';
+import { IClientData } from '../config/infoConfig';
 const { ccclass, property } = _decorator;
 
 @ccclass('Login')
@@ -21,8 +22,10 @@ export class Login extends Component {
     @property(Button)
     watchBtn: Button = null;
 
-    black_player_name: string | null = null;
-    white_player_name: string | null = null;
+    blackPlayer: string | null = null;
+    whitePlayer: string | null = null;
+    watchers: number = 0;
+    
 
     protected onLoad(): void {
         this.joinBtn.node.on(Button.EventType.CLICK, this.onJoinBtnClick, this);
@@ -30,12 +33,14 @@ export class Login extends Component {
     }
 
     protected update(dt: number): void {
-        this.black_player_name = GameDirector.instance.gameInfo.black_player_name;
-        this.white_player_name = GameDirector.instance.gameInfo.white_player_name;
+        this.blackPlayer = GameDirector.instance.blackPlayerName;
+        this.whitePlayer = GameDirector.instance.whitePlayerName;
+        this.watchers = GameDirector.instance.watchers;
 
         this.label.string = `当前对局:
-黑方: ${this.black_player_name ? this.black_player_name : '无'}
-白方: ${this.white_player_name ? this.white_player_name : '无'}`;
+黑方: ${this.blackPlayer ? this.blackPlayer : '无'}
+白方: ${this.whitePlayer ? this.whitePlayer : '无'}
+观战人数: ${this.watchers} / 10`;
     }
 
     async onJoinBtnClick() {
@@ -45,40 +50,27 @@ export class Login extends Component {
             return;
         }
 
-        await GameDirector.instance.getGameInfo();
-        if (this.editBox.string !== this.black_player_name && this.editBox.string !== this.white_player_name) {
-            let res = await Api.isHasPlayer(this.editBox.string);
-            
-            if (res) {
-                GameDirector.instance.gamePlayer = this.editBox.string;
+        if (playerName !== this.blackPlayer && playerName !== this.whitePlayer) {
+            try {
+
+                let id = await Api.isHasPlayer(playerName);
                 
+                if (id !== -1) {
+                    if (this.blackPlayer === null) {
+                        await Api.joinGame(id, 0);
+                    } else if (this.whitePlayer === null){
+                        await Api.joinGame(id, 1);
+                    } else {
+                        this.tipsPrefab.startJumpEffect('对局玩家已满');
+                    }
 
-                if (this.black_player_name === null) {
-                    GameDirector.instance.gameInfo.black_player_name = this.editBox.string;
-                    let gameInfo = GameDirector.instance.gameInfo;
-                    try {
-                        await Api.updateGameInfo(gameInfo);
-                    } catch (error) {
-                        this.tipsPrefab.startJumpEffect(error);
-                        return;
-                    }
-                } else if (this.white_player_name === null){
-                    GameDirector.instance.gameInfo.white_player_name = this.editBox.string;
-                    let gameInfo = GameDirector.instance.gameInfo;
-                    try {
-                        await Api.updateGameInfo(gameInfo);
-                    } catch (error) {
-                        this.tipsPrefab.startJumpEffect(error);
-                        return;
-                    }
+                    // 跳转GameScene
+                    director.loadScene('Game');
                 } else {
-                    this.tipsPrefab.startJumpEffect('对局玩家已满,请耐心等待');
+                    this.tipsPrefab.startJumpEffect('用户名不可用,请联系管理员');
                 }
-
-                // 跳转GameScene
-                director.loadScene('Game');
-            } else {
-                this.tipsPrefab.startJumpEffect('用户名不可用,请联系管理员');
+            } catch (error) {
+                this.tipsPrefab.startJumpEffect(error);
             }
         } else {
             this.tipsPrefab.startJumpEffect('该用户已在线,请选择其他用户名');
@@ -88,7 +80,12 @@ export class Login extends Component {
     onWatchBtnClick() {
         GameDirector.instance.gamePlayer = this.editBox.string;
         
-        // 跳转GameScene
-        director.loadScene('Game');
+        if (this.watchers < 10) {
+            Api.joinGame(-1, 0);
+            // 跳转Game场景
+            director.loadScene('Game');
+        } else { 
+            this.tipsPrefab.startJumpEffect('观战人数已满');
+        }
     }
 }

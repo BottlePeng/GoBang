@@ -43,10 +43,16 @@ try {
 // 获取端口
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
+// 配置ws服务器
+const config = {
+  port: parseInt(process.env.PORT || '3000'),
+  heartbeatInterval: parseInt(process.env.HEARTBEAT_INTERVAL || '30000'),
+  maxConnections: parseInt(process.env.MAX_CONNECTIONS || '100')
+};
+
 // 启动
 app.listen(PORT, () => {
-  DBModel.restart();
   console.log(`🚀 服务器启动成功！`);
-  console.log(`📡 服务器运行在 http://localhost:${PORT}`);
+  console.log(`📡 服务器端口${PORT}已开启`);
   console.log(`🌍 环境: ${process.env.NODE_ENV || 'development'}`);
 });

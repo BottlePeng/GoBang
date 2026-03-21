@@ -1,6 +1,5 @@
 import { _decorator, Component, director } from 'cc';
 import { Api } from '../api/api';
-import { IGoBangGameInfo } from '../config/networkConfig';
 const { ccclass, property } = _decorator;
 
 @ccclass('GameDirector')
@@ -13,30 +12,37 @@ export class GameDirector extends Component {
     }
 
     //=======================================变量=========================================
-    gameInfo: IGoBangGameInfo = {
-        black_player_name: null,
-        white_player_name: null,
-        current_turn: 0,
-        board_state: [
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        ],
-    };
+    // 由服务器返回的信息控制
 
-    gamePlayer: string = 'Tourist'; // 玩家标识，游客-'Tourist', 玩家-'PlayerName'
+    blackPlayerId: number | null = null;
+    blackPlayerName: string | null = null;
+    whitePlayerId: number | null = null;
+    whitePlayerName: string | null = null;
+    currentTurn: 0 | 1 = 0; //当前回合 0-黑方，1-白方
+    boardState: Array<Array<0 | 1 | 2>> = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+
+    gamePlayerId: number = -1; // 玩家id, -1-游客,*-玩家id
+    gamePlayer: string = 'Tourist'; // 玩家标识，游客-'Tourist', 玩家-玩家用户名称
+
+    // 观战人数
+    watchers: number = 0;
+    
     //=======================================生命周期=========================================
 
     onLoad() {
@@ -61,38 +67,11 @@ export class GameDirector extends Component {
         }
     }
 
-    protected async start(): Promise<void> {
-        this.getGameInfo();
+    start() {
+        // todo 进行服务器握手
     }
 
     //====================================方法============================================
-    async getGameInfo() {
-        try {
-            const response: IGoBangGameInfo = await Api.getGameInfo();
-            let data: IGoBangGameInfo = {
-                black_player_name: response.black_player_name,
-                white_player_name: response.white_player_name,
-                current_turn: response.current_turn, // 0-黑棋，1-白棋
-                board_state: response.board_state,
-            };
-            this.gameInfo = data;
-            console.log(data);
-        } catch (error) {
-            console.error('获取游戏信息失败:', error);
-        }
-    }
-
-    getPlayerIndex() {
-        switch (this.gamePlayer) {
-            case 'Tourist':
-                return -1;
-            case this.gameInfo.black_player_name:
-                return 0;
-            case this.gameInfo.white_player_name:
-                return 1;
-            default:
-                return -1;
-        }
-    }
+    
 }
 

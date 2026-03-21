@@ -9,7 +9,7 @@ import { networkConfig } from "../config/networkConfig";
  */
 export function request(method: string, url: string, data: any): Promise<any> {
     return new Promise((resolve, reject) => {
-        const baseUrl = networkConfig.baseUrl;
+        const baseUrl = networkConfig.httpUrl;
         const fullUrl = baseUrl + url;
 
         const xhr = new XMLHttpRequest();

@@ -1,4 +1,4 @@
-import { _decorator, Component, easing, Label, Node, tween, UIOpacity, Vec3 } from 'cc';
+import { _decorator, Component, easing, Label, Node, tween, UIOpacity, Vec3, Tween } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('Tips')
@@ -12,40 +12,99 @@ export class Tips extends Component {
     @property
     jumpDuration: number = 1; // 移动的时间
 
-    private _uiOpacity: UIOpacity = null!; // 添加UIOpacity引用
+    private _uiOpacity: UIOpacity = null!;
+    private initialPosition: Vec3 = new Vec3(0, 0, 0);
+    private _tweenOpacity: Tween<UIOpacity> | null = null;
+    private _tweenPosition: Tween<Node> | null = null;
 
     start() {
-        // 确保节点有UIOpacity组件
         this._uiOpacity = this.node.getComponent(UIOpacity) || this.node.addComponent(UIOpacity);
+        this.initialPosition = this.node.position.clone();
+        this.node.active = false;
     }
 
-    // 启动跳跃和渐变效果
+    /**
+     * 停止当前动画
+     */
+    private stopCurrentAnimation(): void {
+        if (this._tweenOpacity) {
+            this._tweenOpacity.stop();
+            this._tweenOpacity = null;
+        }
+        if (this._tweenPosition) {
+            this._tweenPosition.stop();
+            this._tweenPosition = null;
+        }
+        // 重置状态
+        this._uiOpacity.opacity = 255;
+        this.node.setPosition(this.initialPosition);
+        this.node.active = false;
+    }
+
+    /**
+     * 启动跳跃和渐变效果
+     */
     startJumpEffect(tips: string) {
-        if (this.label) {
-            this.label.string = tips;
-        } else {
-            console.warn('TipJump: label is not assigned');
+        // 停止正在播放的动画
+        this.stopCurrentAnimation();
+
+        if (!this.label) {
+            console.warn('Tips: label is not assigned');
+            return;
         }
 
-        const initialPosition = new Vec3(this.node.position);
-        const targetPosition = initialPosition.clone().add(new Vec3(0, this.jumpDistance, 0));
+        this.label.string = tips;
+        this.node.active = true;
+        this._uiOpacity.opacity = 255;
+        this.node.setPosition(this.initialPosition);
 
-        tween(this._uiOpacity) // 对UIOpacity组件进行tween
-            .to(this.jumpDuration, { opacity: 0 }, { easing: easing.circIn }) // 渐变消失
+        const targetPosition = this.initialPosition.clone().add(new Vec3(0, this.jumpDistance, 0));
+
+        // 透明度动画
+        this._tweenOpacity = tween(this._uiOpacity)
+            .to(this.jumpDuration, { opacity: 0 }, { easing: easing.circIn })
             .call(() => {
-                // 动画结束后,设置节点位置为初始位置,并设置UIOpacity组件的opacity为255
                 this._uiOpacity.opacity = 255;
             })
             .start();
 
-        // 位置动画单独处理
-        tween(this.node)
+        // 位置动画
+        this._tweenPosition = tween(this.node)
             .to(this.jumpDuration, { position: targetPosition }, { easing: easing.quintOut })
             .call(() => {
-                this.node.setPosition(initialPosition);
+                this.node.setPosition(this.initialPosition);
+                this.node.active = false;
             })
             .start();
     }
+
+    /**
+     * 显示提示（带防抖，避免快速连续调用）
+     */
+    private _showTimeout: any = null;
+
+    showTips(tips: string, delay: number = 0.5): void {
+        // 防抖：清除之前的定时器
+        if (this._showTimeout) {
+            clearTimeout(this._showTimeout);
+        }
+
+        // 如果正在显示，先停止
+        if (this.node.active) {
+            this.stopCurrentAnimation();
+        }
+
+        // 延迟显示，避免快速连续调用
+        this._showTimeout = setTimeout(() => {
+            this.startJumpEffect(tips);
+            this._showTimeout = null;
+        }, delay * 1000);
+    }
+
+    onDestroy() {
+        if (this._showTimeout) {
+            clearTimeout(this._showTimeout);
+        }
+        this.stopCurrentAnimation();
+    }
 }
-
-

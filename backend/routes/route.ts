@@ -53,19 +53,6 @@ export default function setupRoutes(app: Application): void {
         }
     });
 
-    // 心跳检测
-    app.post('/api/heartbeat', async (req: Request, res: Response) => {
-        try {
-            await Serve.postHeartbeat(req, res);
-        } catch (error) {
-            console.error('updateGameInfo 路由错误:', error);
-            res.status(500).json({
-                success: false,
-                message: '服务器内部错误'
-            });
-        }
-    });
-
     // 处理 404 - 未找到的路由
     app.use((req: Request, res: Response) => {
         res.status(404).json({

@@ -30,44 +30,4 @@ export class Serve {
             res.send(result);
         });
     }
-
-    // 心跳检查
-    static async postHeartbeat(req: Request, res: Response) {
-        const who: number = req.body.playerIndex; // 0-黑棋, 1-白棋
-
-        if (who !== 0 && who !== 1) {
-            console.warn('无效的玩家标识');
-            return;
-        }
-
-        // 获取或初始化心跳状态
-        let heartbeat = this.heartbeats.get(who);
-        if (!heartbeat) {
-            heartbeat = { active: false, timer: null };
-            this.heartbeats.set(who, heartbeat);
-        }
-
-        // 第一次心跳，激活
-        if (!heartbeat.active) {
-            heartbeat.active = true;
-            console.log(`心跳检测激活`);
-        }
-
-        // 重置计时器
-        if (heartbeat.timer) {
-            clearTimeout(heartbeat.timer);
-        }
-
-        // 设置新的计时器
-        heartbeat.timer = setTimeout(() => {
-            if (heartbeat.active) {
-                console.warn(`${who === 0 ? '黑棋' : '白棋'}心跳超时`);
-                heartbeat.active = false;
-                DBModel.endHeartbeat(who);
-                this.heartbeats.delete(who); // 清理
-            }
-        }, 30000); // 30秒
-
-        console.log(`玩家 ${who === 0 ? '黑棋' : '白棋'} 心跳正常`);
-    }
 }
