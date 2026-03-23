@@ -100,7 +100,7 @@ export class Serve {
     /**
      * 处理新的 WebSocket 连接
      */
-    private handleConnection(ws: WebSocket, req: http.IncomingMessage): void {
+    private async handleConnection(ws: WebSocket, req: http.IncomingMessage): Promise<void> {
         // 检查连接数限制
         if (this.clients.size >= parseInt(process.env.MAX_CONNECTIONS || '12')) {
             console.log(`[${new Date().toLocaleTimeString()}] 连接数已达上限，拒绝新连接`);
@@ -145,7 +145,13 @@ export class Serve {
         });
 
         // 发送对局信息
-        this.sendToClient(ws, Serve.getGameInfo());
+        let message: IWsMessage = {
+            type: MessageType.UPDATE,
+            data: {
+                gameInfo: await Serve.getGameInfo(),
+            }
+        }
+        this.sendToClient(ws, message);
     }
 
     /**
@@ -222,7 +228,7 @@ export class Serve {
     /**
      * 发送消息给客户端
      */
-    private sendToClient(ws: WebSocket, message: any): void {
+    private sendToClient(ws: WebSocket, message: IWsMessage): void {
         if (ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify(message));
         }

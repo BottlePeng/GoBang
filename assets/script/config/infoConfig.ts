@@ -11,5 +11,5 @@ export interface IMessage {
 
 export enum MessageType {
     ERROR = `error`,
-    CONNECT = `connect`,
+    UPDATE = `update`,
 }

@@ -18,6 +18,7 @@ export class Api {
                     console.log(`${playerName}加入游戏成功`);
                     GameDirector.instance.playerName = playerName;
                     GameDirector.instance.playerId = response.data.id;
+                    GameDirector.instance.playerColor = response.data.color;
                     GameDirector.instance.token = response.data.token;
                 } else {
                     throw new Error(response.message);

@@ -33,6 +33,7 @@ export class Login extends Component {
 
         try {
             await Api.joinGame(playerName);
+            
             // 跳转Game场景
             director.loadScene('Game');
         } catch (error) {

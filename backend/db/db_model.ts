@@ -58,6 +58,7 @@ export class DBModel {
             res.data = {
                 id: playerId,
                 token: _token,
+                color: playerColor,
             };
             console.log(`ID为${playerId}的玩家已成为${playerColor === 0 ? '黑方' : '白方'}`);
         } else {

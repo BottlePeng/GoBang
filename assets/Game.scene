@@ -327,7 +327,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 321.75390625,
-      "height": 107.96
+      "height": 199.95999999999998
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -356,7 +356,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "当前回合:黑方\n你自己: 未知-黑方",
+    "_string": "黑方:player1\n白方:player2\n当前回合:黑方\n你自己: 未知-黑方",
     "_horizontalAlign": 1,
     "_verticalAlign": 2,
     "_actualFontSize": 40,
@@ -412,7 +412,7 @@
     "_target": null,
     "_left": 440.812203125,
     "_right": 0,
-    "_top": -200,
+    "_top": -246,
     "_bottom": 1138.98,
     "_horizontalCenter": 0,
     "_verticalCenter": 0,
@@ -597,6 +597,9 @@
     },
     "_enabled": true,
     "__prefab": null,
+    "label": {
+      "__id__": 8
+    },
     "_id": "faE9up/MpCZJA481jGjlhE"
   },
   {

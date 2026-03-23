@@ -14,10 +14,10 @@ export class GameDirector extends Component {
     //=======================================变量=========================================
     // 由服务器返回的信息控制
 
-    blackPlayerId: number | null = null;
-    blackPlayerName: string | null = null;
-    whitePlayerId: number | null = null;
-    whitePlayerName: string | null = null;
+    blackPlayerId: number = -1;
+    blackPlayerName: string = `无`;
+    whitePlayerId: number = -1;
+    whitePlayerName: string = `无`;
     currentTurn: 0 | 1 = 0; //当前回合 0-黑方，1-白方
     boardState: Array<Array<0 | 1 | 2>> = [
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -66,11 +66,6 @@ export class GameDirector extends Component {
             GameDirector._instance = null;
         }
     }
-
-    start() {
-        // todo 进行服务器握手
-    }
-
     //====================================方法============================================
     
 }
