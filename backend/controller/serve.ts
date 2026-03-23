@@ -17,6 +17,12 @@ interface IClientInfo {
 
 export class Serve {
     // ===============================通用================================
+    // 静态实例引用
+    private static _instance: Serve | null = null;
+    static get instance(): Serve | null {
+        return Serve._instance;
+    }
+
     // 获取游戏信息
     static async getGameInfo() {
         return await DBModel.getGameInfo();
@@ -31,43 +37,84 @@ export class Serve {
     // 加入游戏
     static async joinGame(req: Request, res: Response) {
         let gameInfo = await Serve.getGameInfo();
-
         const playerName: string = req.body.playerName;
 
         let result: IHttpMessage = {
             success: false,
-        }
+            message: '',
+        };
 
+        // 游客加入观战
         if (playerName === 'Tourist') {
-            // 游客加入游戏
             result = {
                 success: true,
                 message: `游客加入观战`,
                 data: {
                     id: -1,
                     token: `-1-0-${Date.now()}`,
+                    color: -1,
                 }
-            }
+            };
+            res.send(result);
+            return;
+        }
+
+        // 查询玩家id
+        let playerId: number = await DBModel.isHasPlayer(playerName);
+
+        if (playerId === -1) {
+            result = {
+                success: false,
+                message: `玩家${playerName}不存在，请联系管理员`,
+            };
+            res.send(result);
+            return;
+        }
+
+        // 检查玩家是否已经在游戏中
+        const isAlreadyInGame = (gameInfo.blackPlayerId === playerId) ||
+            (gameInfo.whitePlayerId === playerId);
+
+        if (isAlreadyInGame) {
+            result = {
+                success: false,
+                message: `玩家${playerName}已经在游戏中`,
+            };
+            console.log(result.message);
+            res.send(result);
+            return;
+        }
+
+        // 检查游戏是否已满
+        const isGameFull = (gameInfo.blackPlayerId !== -1 && gameInfo.whitePlayerId !== -1);
+
+        if (isGameFull) {
+            result = {
+                success: false,
+                message: `游戏已满，无法加入`,
+            };
+            console.log(result.message);
+            res.send(result);
+            return;
+        }
+
+        // 优先分配黑色，如果黑色已满则分配白色
+        if (gameInfo.blackPlayerId === -1) {
+            result = await DBModel.joinGame(playerId, 0);
+        } else if (gameInfo.whitePlayerId === -1) {
+            result = await DBModel.joinGame(playerId, 1);
         } else {
-            // 查询玩家id,-1为没有找到
-            let id: number = await DBModel.isHasPlayer(playerName);
+            result = {
+                success: false,
+                message: `无法加入游戏，未知错误`,
+            };
+        }
 
-            if (id === -1) {
-                result = {
-                    success: false,
-                    message: `玩家${playerName}不存在,请联系管理员`,
-                }
-            }
-
-            if (gameInfo.blackPlayerId === -1 && gameInfo.whitePlayerId !== id) {
-                result = await DBModel.joinGame(id, 0);
-            } else if (gameInfo.whitePlayerId === -1 && gameInfo.whitePlayerId !== id) {
-                result = await DBModel.joinGame(id, 1);
-            } else {
-                result = {
-                    success: false,
-                    message: `用户已在线或者玩家已满`,
-                }
+        // 加入成功后，可以广播通知其他玩家
+        if (result.success) {
+            // 通过静态实例广播
+            if (Serve._instance) {
+                await Serve._instance.broadcastGameUpdate();
             }
         }
 
@@ -81,6 +128,9 @@ export class Serve {
     private heartbeatInterval: NodeJS.Timeout | null = null;    // 心跳定时器
 
     constructor(server: http.Server) {
+        // 保存实例引用
+        Serve._instance = this;
+
         // 重置游戏
         DBModel.restart();
 
