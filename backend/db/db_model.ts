@@ -75,24 +75,24 @@ export class DBModel {
         
         let gameInfo = {
             blackPlayerId: -1,
-            blackPlayerName: '',
+            blackPlayerName: '无',
             whitePlayerId: -1,
-            whitePlayerName: '',
+            whitePlayerName: '无',
             currentTurn: 0,
             boardState: []
         }
 
-        gameInfo.blackPlayerId = result[0].black_player_id? result.black_player_id : -1;
-        gameInfo.whitePlayerId = result[0].white_player_id? result.white_player_id : -1;
-        gameInfo.currentTurn = result[0].current_turn ? result.current_turn : 0;
+        gameInfo.blackPlayerId = result[0].black_player_id ? result[0].black_player_id : -1;
+        gameInfo.whitePlayerId = result[0].white_player_id ? result[0].white_player_id : -1;
+        gameInfo.currentTurn = result[0].current_turn ? result[0].current_turn : 0;
         gameInfo.boardState = result[0].board_state;
         
         let sql2 = `SELECT name FROM players WHERE id = ?`;
         let result2 = await DB.query(sql2, [gameInfo.blackPlayerId]) as any;
-        gameInfo.blackPlayerName = result2.length > 0 ? result2[0].name : '';
+        gameInfo.blackPlayerName = result2.length > 0 ? result2[0].name : '无';
         result2 = await DB.query(sql2, [gameInfo.whitePlayerId]) as any;
-        gameInfo.whitePlayerName = result2.length > 0 ? result2[0].name : '';
-
+        gameInfo.whitePlayerName = result2.length > 0 ? result2[0].name : '无';
+        
         return gameInfo;
     }
 

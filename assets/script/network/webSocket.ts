@@ -130,22 +130,22 @@ export class GameWebSocket extends Component {
      */
     private handleMessage(event: MessageEvent) {
         try {
-            const data = JSON.parse(event.data);
-            console.log('[WebSocket] 收到消息:', data.type);
+            const _data = JSON.parse(event.data);
+            console.log('[WebSocket] 收到消息:', _data.type);
 
-            switch (data.type) {
+            switch (_data.type) {
                 case MessageType.UPDATE:
                     // 更新游戏状态
-                    GameDirector.instance.blackPlayerId = data.blackPlayerId;
-                    GameDirector.instance.blackPlayerName = data.blackPlayerName;
-                    GameDirector.instance.whitePlayerId = data.whitePlayerId;
-                    GameDirector.instance.whitePlayerName = data.whitePlayerName;
-                    GameDirector.instance.currentTurn = data.currentTurn;
-                    GameDirector.instance.boardState = data.boardState;
+                    GameDirector.instance.blackPlayerId = _data.data?.gameInfo?.blackPlayerId;
+                    GameDirector.instance.blackPlayerName = _data.data?.gameInfo?.blackPlayerName;
+                    GameDirector.instance.whitePlayerId = _data.data?.gameInfo?.whitePlayerId;
+                    GameDirector.instance.whitePlayerName = _data.data?.gameInfo?.whitePlayerName;
+                    GameDirector.instance.currentTurn = _data.data?.gameInfo?.currentTurn;
+                    GameDirector.instance.boardState = _data.data?.gameInfo?.boardState;
                     break;
 
                 case MessageType.ERROR:
-                    console.error('[WebSocket] 服务器错误:', data.data?.message);
+                    console.error('[WebSocket] 服务器错误:', _data.data?.message);
                     break;
 
                 case MessageType.SHOTDOWN:
@@ -154,7 +154,7 @@ export class GameWebSocket extends Component {
                     break;
                     
                 default:
-                    console.log('[WebSocket] 未知消息类型:', data.type);
+                    console.log('[WebSocket] 未知消息类型:', _data.type);
             }
         } catch (error) {
             console.error('[WebSocket] 消息解析失败:', error);
