@@ -48,13 +48,16 @@ export class Game extends Component {
             this.btns.children.forEach((btn: Node) => {
                 const row = Math.floor(parseInt(btn.name) / 13);
                 const col = parseInt(btn.name) % 13;
-                btn.on(Button.EventType.CLICK, () => {
-                    this.makeStep(row, col);
-                    if (GameDirector.instance.currentTurn === GameDirector.instance.playerColor) {
-                        btn.getComponent(Btn).setColor(GameDirector.instance.playerColor + 1);
-                        console.log('row:', row, 'col:', col);
-                    }
-                });
+
+                if (GameDirector.instance.boardState[row][col] === 0) {
+                    btn.on(Button.EventType.CLICK, () => {
+                        this.makeStep(row, col);
+                        if (GameDirector.instance.currentTurn === GameDirector.instance.playerColor) {
+                            btn.getComponent(Btn).setColor(GameDirector.instance.playerColor + 1);
+                            console.log('row:', row, 'col:', col);
+                        }
+                    });
+                }
             });
         } 
     }
@@ -84,8 +87,6 @@ export class Game extends Component {
             const row = Math.floor(parseInt(btn.name) / 13);
             const col = parseInt(btn.name) % 13;
             btn.getComponent(Btn).setColor(GameDirector.instance.boardState[row][col]);
-            console.log(GameDirector.instance.boardState[row][col]);
-            
         });
     }
 }
